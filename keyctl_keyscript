@@ -1,0 +1,26 @@
+#!/bin/bash
+# keyctl_keyscript - to use in /etc/crypttab as keyscript
+#  allows to cache passwords for cryptdevices for 60s
+#  password is linked for cryptdevices with the same _FAKE_ keyfile
+#  keyfile is the value of the 3. field from /etc/crypttab if keyscript is used
+
+die()
+{
+    echo -e "$@" >&@
+    exit 1
+}
+
+# the keyfile given from crypttab is used as identifier in the keyring
+ID_="$1"
+
+KID_=$(keyctl search @u user "$ID_" 2>/dev/null)
+if [[ $? != 0 || $KID_ == "" ]]; then
+    # key not found, ask the user
+    KID_=$(keyctl padd user "$ID_" @u)
+    [[ $KID_ == "" ]] && die "Error adding passphrase to kernel keyring"
+    if ! keyctl timeout $KID_ 60; then
+        keyctl unlink $KID_ @u
+        die "Error setting timeout on key ($KID_), removing"
+    fi
+fi
+keyctl pipe $KID_
