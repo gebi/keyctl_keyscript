@@ -1,0 +1,82 @@
+keyctl_keyscript
+================
+
+A passphrase caching script to be used in /etc/crypttab on Debian and Ubuntu.
+When there are multiple cryptsetup (either plain or LUKS) volumes with the same
+passphrase, it is an unnecessary task to input the passphrase more than once.
+
+Just add this script as keyscript to your /etc/crypttab and it will cache the
+passphrase of all cryptab entries with the same identifier.
+
+
+Requirements
+------------
+
+    - Debian cryptsetup package with /etc/crypttab handling and keyscript option
+        - Tested with Debian Lenny, Squeeze and Sid
+    - Installed and working keyutils package (keyctl)
+        - Needs CONFIG_KEYS=y in your kernel configuration
+
+
+What For?
+---------
+
+Currently dm-crypt under Linux does not scale to multiple cores, thus with
+multiple disk software raid dm-crypt should be on each individal disk not on
+the sofware raid device.
+
+With a 5 disk raid5 it is a rather pointless task to input the passphrase five
+times.
+This is exactly the task this script should solve.
+
+
+Usage
+-----
+
+Best shown by example:
+    - 5 disks
+    - Linux software raid5
+
+Layer:
+      sda             sdb            sdc ... sde
+    +-----------+   +-----------+
+    | LUKS      |   | LUKS      |
+    | +-------+ |   | +-------+ |
+    | | RAID5 | |   | | RAID5 | |
+    | | ...   | |   | | ...   | |
+
+Crypttab Entries:
+
+<target>    <source>    <keyfile>   <options>
+sda_crypt   /dev/sda2   id_raid5    luks,keyscript=/sbin/keyctl_keyscript
+sdb_crypt   /dev/sdb2   id_raid5    luks,keyscript=/sbin/keyctl_keyscript
+...
+
+How does it work
+----------------
+
+Crypttab Interface:
+A keyscript is added to options including a keyfile definition as third
+parameter in the crypttab file. The keyscript is called with the keyfile as the
+first and only parameter. Additionally there are a few environment variables
+set but currently are not used by this keyscript (man 5 crypttab for exact
+description).
+
+Keyscript:
+Keyctl_keyscript uses the Linux kernel keyring facility to securly cache
+passphrases between multiple invocations.
+The keyfile parameter from cryptab is used to find the same passphrase between
+multiple invocations, it is thus used as a _fake_ keyfile, and has nothing to
+do with the real passphrase!
+
+Currently the cache timeout is 60 seconds and not configurable (please report a
+bug if it is too low for you).
+
+
+Hints
+-----
+
+To remove all traces of this keyscript you may want to cleanup the keyring
+completely with the following command afterwards:
+    sudo keyctl clear @u
+
