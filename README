@@ -21,13 +21,15 @@ Requirements
 What For?
 ---------
 
-Currently dm-crypt under Linux does not scale to multiple cores, thus with
-multiple disk software raid dm-crypt should be on each individal disk not on
-the sofware raid device.
+The current state for dm-crypt in Linux is that it is single threaded, thus
+every dm-crypt mapping only uses a single on for crypto operations.
+To use the full power of your many-core processor it is thus necessary to split
+the dm-crypt device. For Linux software raid arrays the easiest split is to
+just put the dm-crypt layer below the software raid layer.
 
-With a 5 disk raid5 it is a rather pointless task to input the passphrase five
+But with a 5 disk raid5 it is a rather sad task to input the passphrase five
 times.
-This is exactly the task this script should solve.
+This is what the scripts tries to solve for you.
 
 
 Usage
