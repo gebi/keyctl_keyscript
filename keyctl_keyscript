@@ -18,7 +18,7 @@
 
 die()
 {
-    echo -e "$@" >&@
+    echo -e "$@" >&2
     exit 1
 }
 
