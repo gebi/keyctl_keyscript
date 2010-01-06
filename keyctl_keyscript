@@ -27,6 +27,7 @@ ID_="$1"
 
 KID_=$(keyctl search @u user "$ID_" 2>/dev/null)
 if [[ $? != 0 || $KID_ == "" ]]; then
+    echo -n "Enter passphrase for ${CRYPTTAB_SOURCE}: " >&2
     # key not found, ask the user
     if ! read -res KEY_; then
         die "Error reading key from /dev/stdin"
@@ -37,5 +38,7 @@ if [[ $? != 0 || $KID_ == "" ]]; then
         keyctl unlink $KID_ @u
         die "Error setting timeout on key ($KID_), removing"
     fi
+else
+    echo "Using cached passphrase for ${CRYPTTAB_SOURCE}." >&2
 fi
 keyctl pipe $KID_
