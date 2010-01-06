@@ -32,6 +32,7 @@ if [[ $? != 0 || $KID_ == "" ]]; then
     if ! read -res KEY_; then
         die "Error reading key from /dev/stdin"
     fi
+    echo >&2
     KID_=$(echo -n "$KEY_" |keyctl padd user "$ID_" @u)
     [[ $KID_ == "" ]] && die "Error adding passphrase to kernel keyring"
     if ! keyctl timeout $KID_ 60; then
