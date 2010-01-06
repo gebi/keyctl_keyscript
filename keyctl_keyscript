@@ -11,6 +11,10 @@
 #
 #  test1 and test2 have the same identifier thus test2 does not need a password
 #  typed in manually
+#
+#  hint: at first the identifier '/etc/inittab' seems strange, though it's
+#        choosen that the crypttab script does not error out because of a
+#        missing file.
 
 die()
 {

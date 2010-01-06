@@ -49,9 +49,9 @@ Layer:
 
 Crypttab Entries:
 
-<target>    <source>    <keyfile>   <options>
-sda_crypt   /dev/sda2   id_raid5    luks,keyscript=/sbin/keyctl_keyscript
-sdb_crypt   /dev/sdb2   id_raid5    luks,keyscript=/sbin/keyctl_keyscript
+<target>    <source>    <keyfile>       <options>
+sda_crypt   /dev/sda2   /etc/inittab    luks,keyscript=/sbin/keyctl_keyscript
+sdb_crypt   /dev/sdb2   /etc/inittab    luks,keyscript=/sbin/keyctl_keyscript
 ...
 
 
