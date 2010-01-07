@@ -24,18 +24,29 @@ die()
 
 # the keyfile given from crypttab is used as identifier in the keyring
 ID_="$1"
+TIMEOUT_='60'
+ASKPASS_='/lib/cryptsetup/askpass'
+USE_ASKPASS_='false'
+PROMPT_="Caching passphrase for ${CRYPTTAB_SOURCE}: "
+
+test -x "$ASKPASS_" && USE_ASKPASS_='true'
 
 KID_=$(keyctl search @u user "$ID_" 2>/dev/null)
 if [[ $? != 0 || $KID_ == "" ]]; then
-    echo -n "Enter passphrase for ${CRYPTTAB_SOURCE}: " >&2
-    # key not found, ask the user
-    if ! read -res KEY_; then
-        die "Error reading key from /dev/stdin"
+    if [[ $USE_ASKPASS_ == 'true' ]]; then
+        KEY_=$($ASKPASS_ "$PROMPT_") || die "Error executing $ASKPASS_"
+    else
+        echo -n "$PROMPT_" >&2
+        # key not found, ask the user
+        if ! read -res KEY_; then
+            die "Error reading key from /dev/stdin"
+        else
+            echo >&2
+        fi
     fi
-    echo >&2
     KID_=$(echo -n "$KEY_" |keyctl padd user "$ID_" @u)
     [[ $KID_ == "" ]] && die "Error adding passphrase to kernel keyring"
-    if ! keyctl timeout $KID_ 60; then
+    if ! keyctl timeout $KID_ $TIMEOUT_; then
         keyctl unlink $KID_ @u
         die "Error setting timeout on key ($KID_), removing"
     fi
