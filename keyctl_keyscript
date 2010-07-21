@@ -33,11 +33,11 @@ test -x "$ASKPASS_" && USE_ASKPASS_='true'
 
 KID_=$(keyctl search @u user "$ID_" 2>/dev/null)
 if [[ $? != 0 || $KID_ == "" ]]; then
+    # key not found, ask the user
     if [[ $USE_ASKPASS_ == 'true' ]]; then
         KEY_=$($ASKPASS_ "$PROMPT_") || die "Error executing $ASKPASS_"
     else
         echo -n "$PROMPT_" >&2
-        # key not found, ask the user
         if ! read -res KEY_; then
             die "Error reading key from /dev/stdin"
         else
