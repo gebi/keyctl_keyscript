@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # decrypt_keyctl - to use in /etc/crypttab as keyscript
 #  Allows to cache passwords for cryptdevices for 60s
 #  The same password is used for for cryptdevices with the same identifier.
@@ -15,7 +15,7 @@
 
 die()
 {
-    echo -e "$@" >&2
+    echo "$@" >&2
     exit 1
 }
 
@@ -30,9 +30,9 @@ PROMPT_="Caching passphrase for ${CRYPTTAB_SOURCE}: "
 test -x "$ASKPASS_" && USE_ASKPASS_='true'
 
 KID_=$(keyctl search @u user "$ID_" 2>/dev/null)
-if [[ $? != 0 || $KID_ == "" ]]; then
+if [ $? -ne 0 -a -z "$KID_" ]; then
     # key not found, ask the user
-    if [[ $USE_ASKPASS_ == 'true' ]]; then
+    if [ "$USE_ASKPASS_" -eq 'true' ]; then
         KEY_=$($ASKPASS_ "$PROMPT_") || die "Error executing $ASKPASS_"
     else
         echo -n "$PROMPT_" >&2
@@ -43,7 +43,7 @@ if [[ $? != 0 || $KID_ == "" ]]; then
         fi
     fi
     KID_=$(echo -n "$KEY_" |keyctl padd user "$ID_" @u)
-    [[ $KID_ == "" ]] && die "Error adding passphrase to kernel keyring"
+    [ -z "$KID_" ] && die "Error adding passphrase to kernel keyring"
     if ! keyctl timeout $KID_ $TIMEOUT_; then
         keyctl unlink $KID_ @u
         die "Error setting timeout on key ($KID_), removing"
