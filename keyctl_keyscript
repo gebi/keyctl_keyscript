@@ -23,7 +23,8 @@ die()
 }
 
 # the keyfile given from crypttab is used as identifier in the keyring
-ID_="$1"
+# including the prefix "cryptkey-"
+ID_="cryptkey-$1"
 TIMEOUT_='60'
 ASKPASS_='/lib/cryptsetup/askpass'
 USE_ASKPASS_='false'
