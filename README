@@ -22,7 +22,7 @@ What For?
 ---------
 
 The current state for dm-crypt in Linux is that it is single threaded, thus
-every dm-crypt mapping only uses a single on for crypto operations.
+every dm-crypt mapping only uses a single core for crypto operations.
 To use the full power of your many-core processor it is thus necessary to split
 the dm-crypt device. For Linux software raid arrays the easiest split is to
 just put the dm-crypt layer below the software raid layer.
