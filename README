@@ -1,5 +1,5 @@
-keyctl_keyscript
-================
+decrypt_keyctl
+==============
 
 A passphrase caching script to be used in /etc/crypttab on Debian and Ubuntu.
 When there are multiple cryptsetup (either plain or LUKS) volumes with the same
@@ -7,6 +7,11 @@ passphrase, it is an unnecessary task to input the passphrase more than once.
 
 Just add this script as keyscript to your /etc/crypttab and it will cache the
 passphrase of all cryptab entries with the same identifier.
+
+Either copy decrypt_keyctl into the default search path for keyscripts from
+cryptsetup /lib/cryptdisks/scripts/. So you can just write keyscript=decrypt_keyctl
+in /etc/crypttab, or use a random path of your choice and give the full path
+e.g keyscript=/sbin/decrypt_keyctl.
 
 
 Requirements
@@ -24,12 +29,12 @@ What For?
 The current state for dm-crypt in Linux is that it is single threaded, thus
 every dm-crypt mapping only uses a single core for crypto operations.
 To use the full power of your many-core processor it is thus necessary to split
-the dm-crypt device. For Linux software raid arrays the easiest split is to
+the dm-crypt device. For Linux software raid arrays the easiest segmentation is to
 just put the dm-crypt layer below the software raid layer.
 
-But with a 5 disk raid5 it is a rather sad task to input the passphrase five
+But with a 5 disk raid5 it is a rather daunting task to input the passphrase five
 times.
-This is what the scripts tries to solve for you.
+This is what this keyscripts solve for you.
 
 
 Usage
@@ -49,10 +54,11 @@ Layer:
 
 Crypttab Entries:
 
-<target>    <source>    <keyfile>       <options>
-sda_crypt   /dev/sda2   /etc/inittab    luks,keyscript=/sbin/keyctl_keyscript
-sdb_crypt   /dev/sdb2   /etc/inittab    luks,keyscript=/sbin/keyctl_keyscript
+<target>    <source>    <keyfile>        <options>
+sda_crypt   /dev/sda2   main_data_raid   luks,keyscript=decrypt_keyctl
+sdb_crypt   /dev/sdb2   main_data_raid   luks,keyscript=decrypt_keyctl
 ...
+sde_crypt   /dev/sde2   main_data_raid   luks,keyscript=decrypt_keyctl
 
 
 How does it work
@@ -69,8 +75,7 @@ Keyscript:
 Keyctl_keyscript uses the Linux kernel keyring facility to securly cache
 passphrases between multiple invocations.
 The keyfile parameter from cryptab is used to find the same passphrase between
-multiple invocations, it is thus used as a _fake_ keyfile, and has nothing to
-do with the real passphrase!
+multiple invocations.
 
 Currently the cache timeout is 60 seconds and not configurable (please report a
 bug if it is too low for you).

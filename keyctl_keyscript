@@ -1,20 +1,17 @@
 #!/bin/bash
-# keyctl_keyscript - to use in /etc/crypttab as keyscript
-#  allows to cache passwords for cryptdevices for 60s
-#  password is linked for cryptdevices with the same _FAKE_ keyfile
-#  keyfile is the value of the 3. field from /etc/crypttab if keyscript is used
+# decrypt_keyctl - to use in /etc/crypttab as keyscript
+#  Allows to cache passwords for cryptdevices for 60s
+#  The same password is used for for cryptdevices with the same identifier.
+#  The keyfile parameter, which is the third field from /etc/crypttab, is
+#  used as identifier in this keyscript.
 #
 # sample crypttab entries:
-# test1   /dev/loop1    /etc/inittab    luks,keyscript=/sbin/keyscript
-# test2   /dev/loop2    /etc/inittab    luks,keyscript=/sbin/keyscript
-# test3   /dev/loop3    /etc/passwd     luks,keyscript=/sbin/keyscript
+# test1   /dev/loop1    test_pw         luks,keyscript=decrypt_keyctl
+# test2   /dev/loop2    test_pw         luks,keyscript=decrypt_keyctl
+# test3   /dev/loop3    test_other_pw   luks,keyscript=decrypt_keyctl
 #
 #  test1 and test2 have the same identifier thus test2 does not need a password
 #  typed in manually
-#
-#  hint: at first the identifier '/etc/inittab' seems strange, though it's
-#        choosen that the crypttab script does not error out because of a
-#        missing file.
 
 die()
 {
