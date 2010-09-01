@@ -81,6 +81,14 @@ Currently the cache timeout is 60 seconds and not configurable (please report a
 bug if it is too low for you).
 
 
+Problems
+--------
+
+    - Passphrase is piped between processes and could end up in unsecured
+        memory, thus later swapped to disk!
+        => Use of cryptoswap recommend!
+
+
 Hints
 -----
 
