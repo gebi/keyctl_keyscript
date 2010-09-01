@@ -30,7 +30,7 @@ PROMPT_="Caching passphrase for ${CRYPTTAB_SOURCE}: "
 test -x "$ASKPASS_" && USE_ASKPASS_='true'
 
 KID_=$(keyctl search @u user "$ID_" 2>/dev/null)
-if [ $? -ne 0 -a -z "$KID_" ]; then
+if [ $? -ne 0 -o -z "$KID_" ]; then
     # key not found, ask the user
     if [ "$USE_ASKPASS_" -eq 'true' ]; then
         KEY_=$($ASKPASS_ "$PROMPT_") || die "Error executing $ASKPASS_"
