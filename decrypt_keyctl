@@ -24,24 +24,48 @@ die()
 ID_="cryptkey-$1"
 TIMEOUT_='60'
 ASKPASS_='/lib/cryptsetup/askpass'
-USE_ASKPASS_='false'
+STTY_='/bin/stty'
+PW_READER_='undefined'
 PROMPT_="Caching passphrase for ${CRYPTTAB_SOURCE}: "
 
-test -x "$ASKPASS_" && USE_ASKPASS_='true'
+test -x "$STTY_" && PW_READER_='stty'           # 1. backup method
+test -x "$ASKPASS_" && PW_READER_='askpass'     # prefered method
 
 KID_=$(keyctl search @u user "$ID_" 2>/dev/null)
 if [ $? -ne 0 ] || [ -z "$KID_" ]; then
     # key not found, ask the user
-    if [ "$USE_ASKPASS_" -eq 'true' ]; then
-        KEY_=$($ASKPASS_ "$PROMPT_") || die "Error executing $ASKPASS_"
-    else
-        echo -n "$PROMPT_" >&2
-        if ! read -res KEY_; then
-            die "Error reading key from /dev/stdin"
-        else
-            echo >&2
-        fi
-    fi
+    case "$PW_READER_" in
+        askpass)
+            KEY_=$($ASKPASS_ "$PROMPT_") || die "Error executing $ASKPASS_"
+            ;;
+        stty) # disable echoing with stty
+            $STTY_ -echo
+            if ! read -r KEY_; then
+                $STTY_ echo
+                die "Error reading key from /dev/stdin"
+            else
+                $STTY_ echo
+                echo >&2
+            fi
+            ;;
+        *)  # first try to read the posix way, then at least give the user a chance
+            echo -n "$PROMPT_" >&2
+            if ! read -res KEY_; then
+                echo
+                echo "ERROR: Can not disable echoing, YOUR PASSWORD WILL BE VISIBLE!" >&2
+                echo "This can be fixed if you add either $ASKPASS_" >&2
+                echo "or $STTY_ to your initramfs" >&2
+                echo -n "$PROMPT_" >&2
+                if ! read -r KEY_; then
+                    die "Error reading key from /dev/stdin"
+                else
+                    echo >&2
+                fi
+            else
+                echo >&2
+            fi
+            ;;
+    esac
     KID_=$(echo -n "$KEY_" |keyctl padd user "$ID_" @u)
     [ -z "$KID_" ] && die "Error adding passphrase to kernel keyring"
     if ! keyctl timeout $KID_ $TIMEOUT_; then
