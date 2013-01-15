@@ -6,9 +6,9 @@
 #  used as identifier in this keyscript.
 #
 # sample crypttab entries:
-# test1   /dev/loop1    test_pw         luks,keyscript=decrypt_keyctl
-# test2   /dev/loop2    test_pw         luks,keyscript=decrypt_keyctl
-# test3   /dev/loop3    test_other_pw   luks,keyscript=decrypt_keyctl
+# test1   /dev/sda1    test_pw         luks,keyscript=decrypt_keyctl
+# test2   /dev/sda2    test_pw         luks,keyscript=decrypt_keyctl
+# test3   /dev/sda3    test_other_pw   luks,keyscript=decrypt_keyctl
 #
 #  test1 and test2 have the same identifier thus test2 does not need a password
 #  typed in manually
