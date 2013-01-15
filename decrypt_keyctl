@@ -6,12 +6,15 @@
 #  used as identifier in this keyscript.
 #
 # sample crypttab entries:
-# test1   /dev/sda1    test_pw         luks,keyscript=decrypt_keyctl
+# test1   /dev/sda1    test_pw:        luks,keyscript=decrypt_keyctl
 # test2   /dev/sda2    test_pw         luks,keyscript=decrypt_keyctl
 # test3   /dev/sda3    test_other_pw   luks,keyscript=decrypt_keyctl
 #
 #  test1 and test2 have the same identifier thus test2 does not need a password
 #  typed in manually
+#
+#  Identifiers ending with : are asked for every time. Use this for your first
+#  groupkey entry.
 
 die()
 {
@@ -19,9 +22,19 @@ die()
     exit 1
 }
 
+# check for keygroup ending with ':'
+CRYPTTABID_="$1"
+TMP_="${CRYPTTABID_%:}"
+if [ "x$CRYPTTABID_" != "x$TMP_" ]; then
+    ASKFORKEY_="true"
+    CRYPTTABID_="$TMP_"
+else
+    ASKFORKEY_="false"
+fi
+
 # the keyfile given from crypttab is used as identifier in the keyring
 # including the prefix "cryptkey-"
-ID_="cryptkey-$1"
+ID_="cryptkey-${CRYPTTABID_}"
 TIMEOUT_='60'
 ASKPASS_='/lib/cryptsetup/askpass'
 STTY_='/bin/stty'
@@ -32,7 +45,7 @@ test -x "$STTY_" && PW_READER_='stty'           # 1. backup method
 test -x "$ASKPASS_" && PW_READER_='askpass'     # prefered method
 
 KID_=$(keyctl search @u user "$ID_" 2>/dev/null)
-if [ $? -ne 0 ] || [ -z "$KID_" ]; then
+if [ $? -ne 0 ] || [ -z "$KID_" ] || [ "$ASKFORKEY_" = "true" ]; then
     # key not found, ask the user
     case "$PW_READER_" in
         askpass)

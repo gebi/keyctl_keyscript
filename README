@@ -13,6 +13,9 @@ cryptsetup /lib/cryptdisks/scripts/. So you can just write keyscript=decrypt_key
 in /etc/crypttab, or use a random path of your choice and give the full path
 e.g keyscript=/sbin/decrypt_keyctl.
 
+As a countermeasure against you misstyping your password please add ':' to the
+first key identifier. That means the script always ask for a passpharse on that
+specific key entry.
 
 Requirements
 ------------
@@ -55,7 +58,7 @@ Layer:
 Crypttab Entries:
 
 <target>    <source>    <keyfile>        <options>
-sda_crypt   /dev/sda2   main_data_raid   luks,keyscript=decrypt_keyctl
+sda_crypt   /dev/sda2   main_data_raid:  luks,keyscript=decrypt_keyctl
 sdb_crypt   /dev/sdb2   main_data_raid   luks,keyscript=decrypt_keyctl
 ...
 sde_crypt   /dev/sde2   main_data_raid   luks,keyscript=decrypt_keyctl
