@@ -34,7 +34,7 @@ fi
 
 # the keyfile given from crypttab is used as identifier in the keyring
 # including the prefix "cryptkey-"
-ID_="cryptkey-${CRYPTTABID_}"
+ID_="cryptkey:${CRYPTTABID_}"
 TIMEOUT_='60'
 ASKPASS_='/lib/cryptsetup/askpass'
 STTY_='/bin/stty'
@@ -79,8 +79,14 @@ if [ $? -ne 0 ] || [ -z "$KID_" ] || [ "$ASKFORKEY_" = "true" ]; then
             fi
             ;;
     esac
-    KID_=$(echo -n "$KEY_" |keyctl padd user "$ID_" @u)
+    KID_=$(echo -n "$KEY_" |keyctl padd user "$ID_" @s)
     [ -z "$KID_" ] && die "Error adding passphrase to kernel keyring"
+    if ! keyctl setperm $KID_ 0x3f3f0000; then
+        keyctl unlink $KID_ @s
+        die "Error setting permissions on key ($KID_), removing"
+    fi
+    keyctl unlink $KID_ @s
+    keyctl link $KID_ @u
     if ! keyctl timeout $KID_ $TIMEOUT_; then
         keyctl unlink $KID_ @u
         die "Error setting timeout on key ($KID_), removing"
