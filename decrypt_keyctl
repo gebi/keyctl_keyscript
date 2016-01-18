@@ -33,7 +33,7 @@ else
 fi
 
 # the keyfile given from crypttab is used as identifier in the keyring
-# including the prefix "cryptkey-"
+# including the prefix "cryptkey:"
 ID_="cryptkey:${CRYPTTABID_}"
 TIMEOUT_='60'
 ASKPASS_='/lib/cryptsetup/askpass'
