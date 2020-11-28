@@ -14,7 +14,7 @@ in /etc/crypttab, or use a random path of your choice and give the full path
 e.g keyscript=/sbin/decrypt_keyctl.
 
 As a countermeasure against you misstyping your password please add ':' to the
-first key identifier. That means the script always ask for a passpharse on that
+first key identifier. That means the script always ask for a passphrase on that
 specific key entry.
 
 Requirements
