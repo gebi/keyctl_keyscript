@@ -76,7 +76,7 @@ description).
 
 ### Keyscript
 
-Keyctl_keyscript uses the Linux kernel keyring facility to securly cache
+Keyctl_keyscript uses the Linux kernel keyring facility to securely cache
 passphrases between multiple invocations.
 The keyfile parameter from cryptab is used to find the same passphrase between
 multiple invocations.

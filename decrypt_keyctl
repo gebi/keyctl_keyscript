@@ -1,7 +1,7 @@
 #!/bin/sh
 # decrypt_keyctl - to use in /etc/crypttab as keyscript
 #  Allows to cache passwords for cryptdevices for 60s
-#  The same password is used for for cryptdevices with the same identifier.
+#  The same password is used for cryptdevices with the same identifier.
 #  The keyfile parameter, which is the third field from /etc/crypttab, is
 #  used as identifier in this keyscript.
 #
@@ -42,7 +42,7 @@ PW_READER_='undefined'
 PROMPT_="Caching passphrase for ${CRYPTTAB_SOURCE}: "
 
 test -x "$STTY_" && PW_READER_='stty'           # 1. backup method
-test -x "$ASKPASS_" && PW_READER_='askpass'     # prefered method
+test -x "$ASKPASS_" && PW_READER_='askpass'     # preferred method
 
 KID_=$(keyctl search @u user "$ID_" 2>/dev/null)
 if [ $? -ne 0 ] || [ -z "$KID_" ] || [ "$ASKFORKEY_" = "true" ]; then
